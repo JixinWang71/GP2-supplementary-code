@@ -1,0 +1,163 @@
+ascp -QT -l 300m -P33001 -i ~/.aspera/connect/etc/asperaweb_id_dsa.openssh era-fasp@fasp.sra.ebi.ac.uk:/vol1/fastq/SRR634/008/SRR6344928/SRR6344928.fastq.gz .
+ascp -QT -l 300m -P33001 -i ~/.aspera/connect/etc/asperaweb_id_dsa.openssh era-fasp@fasp.sra.ebi.ac.uk:/vol1/fastq/SRR634/009/SRR6344929/SRR6344929.fastq.gz .
+ascp -QT -l 300m -P33001 -i ~/.aspera/connect/etc/asperaweb_id_dsa.openssh era-fasp@fasp.sra.ebi.ac.uk:/vol1/fastq/SRR634/000/SRR6344930/SRR6344930.fastq.gz .
+
+ascp -QT -l 300m -P33001 -i ~/.aspera/connect/etc/asperaweb_id_dsa.openssh era-fasp@fasp.sra.ebi.ac.uk:/vol1/fastq/SRR634/007/SRR6344937/SRR6344937.fastq.gz .
+ascp -QT -l 300m -P33001 -i ~/.aspera/connect/etc/asperaweb_id_dsa.openssh era-fasp@fasp.sra.ebi.ac.uk:/vol1/fastq/SRR634/008/SRR6344938/SRR6344938.fastq.gz .
+ascp -QT -l 300m -P33001 -i ~/.aspera/connect/etc/asperaweb_id_dsa.openssh era-fasp@fasp.sra.ebi.ac.uk:/vol1/fastq/SRR634/009/SRR6344939/SRR6344939.fastq.gz .
+
+ascp -QT -l 300m -P33001 -i ~/.aspera/connect/etc/asperaweb_id_dsa.openssh era-fasp@fasp.sra.ebi.ac.uk:/vol1/fastq/SRR634/000/SRR6344940/SRR6344940.fastq.gz .
+ascp -QT -l 300m -P33001 -i ~/.aspera/connect/etc/asperaweb_id_dsa.openssh era-fasp@fasp.sra.ebi.ac.uk:/vol1/fastq/SRR634/001/SRR6344941/SRR6344941.fastq.gz .
+ascp -QT -l 300m -P33001 -i ~/.aspera/connect/etc/asperaweb_id_dsa.openssh era-fasp@fasp.sra.ebi.ac.uk:/vol1/fastq/SRR634/002/SRR6344942/SRR6344942.fastq.gz .
+
+ascp -QT -l 300m -P33001 -i ~/.aspera/connect/etc/asperaweb_id_dsa.openssh era-fasp@fasp.sra.ebi.ac.uk:/vol1/fastq/SRR634/009/SRR6344949/SRR6344949.fastq.gz .
+ascp -QT -l 300m -P33001 -i ~/.aspera/connect/etc/asperaweb_id_dsa.openssh era-fasp@fasp.sra.ebi.ac.uk:/vol1/fastq/SRR634/000/SRR6344950/SRR6344950.fastq.gz .
+ascp -QT -l 300m -P33001 -i ~/.aspera/connect/etc/asperaweb_id_dsa.openssh era-fasp@fasp.sra.ebi.ac.uk:/vol1/fastq/SRR634/001/SRR6344951/SRR6344951.fastq.gz .
+
+
+
+
+source activate
+conda activate fastqcenv
+fastqc SRR6344928.fastq.gz
+fastqc SRR6344929.fastq.gz
+fastqc SRR6344930.fastq.gz
+conda activate cutadaptenv
+cutadapt -j 6 -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACCCGTCCCTCTCGTATGCCGTCTTCTGCTTG -m 75 -o SRR6344928_trimmed.fastq.gz SRR6344928.fastq.gz > trim28.txt
+cutadapt -q 26 -u 10 -m 65 -o SRR6344928_trimmed2.fastq.gz SRR6344928_trimmed.fastq.gz 
+cutadapt -j 6 -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACGTCCGCATCTCGTATGCCGTCTTCTGCTTG -m 75 -o SRR6344929_trimmed.fastq.gz SRR6344929.fastq.gz > trim29.txt
+cutadapt -j 6 -q 26 -u 10 -m 65 -o SRR6344929_trimmed2.fastq.gz SRR6344929_trimmed.fastq.gz
+cutadapt -j 6 -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACGTGAAACTCTCGTATGCCGTCTTCTGCTTG -m 75 -o SRR6344930_trimmed.fastq.gz SRR6344930.fastq.gz > trim30.txt
+cutadapt -j 6 -q 26 -u 10 -m 65 -o SRR6344930_trimmed2.fastq.gz SRR6344930_trimmed.fastq.gz
+conda activate fastqcenv
+fastqc SRR6344928_trimmed2.fastq.gz
+fastqc SRR6344929_trimmed2.fastq.gz
+fastqc SRR6344930_trimmed2.fastq.gz
+
+cd ../Pbrm1_KO
+fastqc SRR6344937.fastq.gz
+fastqc SRR6344938.fastq.gz
+fastqc SRR6344939.fastq.gz
+conda activate cutadaptenv
+cutadapt -j 6 -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACGTGGCCTTCTCGTATGCCGTCTTCTGCTTG -m 75 -o SRR6344937_trimmed.fastq.gz SRR6344937.fastq.gz > trim37.txt
+cutadapt -j 6 -q 26 -u 10 -m 65 -o SRR6344937_trimmed2.fastq.gz SRR6344937_trimmed.fastq.gz
+cutadapt -j 6 -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACGTTTCGGTCTCGTATGCCGTCTTCTGCTTG -m 75 -o SRR6344938_trimmed.fastq.gz SRR6344938.fastq.gz > trim38.txt
+cutadapt -j 6 -q 26 -u 10 -m 65 -o SRR6344938_trimmed2.fastq.gz SRR6344938_trimmed.fastq.gz
+cutadapt -j 6 -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACCGTACGTTCTCGTATGCCGTCTTCTGCTTG -m 75 -o SRR6344939_trimmed.fastq.gz SRR6344939.fastq.gz > trim39.txt
+cutadapt -j 6 -q 26 -u 10 -m 65 -o SRR6344939_trimmed2.fastq.gz SRR6344939_trimmed.fastq.gz
+conda activate fastqcenv
+fastqc SRR6344937_trimmed2.fastq.gz
+fastqc SRR6344938_trimmed2.fastq.gz
+fastqc SRR6344939_trimmed2.fastq.gz
+
+cd ../control_IFNg
+fastqc SRR6344940.fastq.gz
+fastqc SRR6344941.fastq.gz
+fastqc SRR6344942.fastq.gz
+conda activate cutadaptenv
+cutadapt -j 6 -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACATCACGATCTCGTATGCCGTCTTCTGCTTG -m 75 -o SRR6344940_trimmed.fastq.gz SRR6344940.fastq.gz > trim40.txt
+cutadapt -q 26 -u 10 -m 65 -o SRR6344940_trimmed2.fastq.gz SRR6344940_trimmed.fastq.gz
+cutadapt -j 6 -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACTTAGGCATCTCGTATGCCGTCTTCTGCTTG -m 75 -o SRR6344941_trimmed.fastq.gz SRR6344941.fastq.gz > trim41.txt
+cutadapt -q 26 -u 10 -m 65 -o SRR6344941_trimmed2.fastq.gz SRR6344941_trimmed.fastq.gz
+cutadapt -j 6 -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACACTTGAATCTCGTATGCCGTCTTCTGCTTG -m 75 -o SRR6344942_trimmed.fastq.gz SRR6344942.fastq.gz > trim42.txt
+cutadapt -j 6 -q 26 -u 10 -m 65 -o SRR6344942_trimmed2.fastq.gz SRR6344942_trimmed.fastq.gz
+conda activate fastqcenv
+fastqc SRR6344940_trimmed2.fastq.gz
+fastqc SRR6344941_trimmed2.fastq.gz
+fastqc SRR6344942_trimmed2.fastq.gz
+
+cd ../Pbrm1_KO_IFNg
+fastqc SRR6344949.fastq.gz
+fastqc SRR6344950.fastq.gz
+fastqc SRR6344951.fastq.gz
+conda activate cutadaptenv
+cutadapt -j 6 -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACTGACCAATCTCGTATGCCGTCTTCTGCTTG -m 75 -o SRR6344949_trimmed.fastq.gz SRR6344949.fastq.gz > trim49.txt
+cutadapt -j 6 -q 26 -u 10 -m 65 -o SRR6344949_trimmed2.fastq.gz SRR6344949_trimmed.fastq.gz 
+cutadapt -j 6 -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACTGACCAATCTCGTATGCCGTCTTCTGCTTG -m 75 -o SRR6344950_trimmed.fastq.gz SRR6344950.fastq.gz > trim50.txt
+cutadapt -j 6 -q 26 -u 10 -m 65 -o SRR6344950_trimmed2.fastq.gz SRR6344950_trimmed.fastq.gz 
+cutadapt -j 6 -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACACAGTGATCTCGTATGCCGTCTTCTGCTTG -m 75 -o SRR6344951_trimmed.fastq.gz SRR6344951.fastq.gz > trim51.txt
+cutadapt -j 6 -q 26 -u 10 -m 65 -o SRR6344951_trimmed2.fastq.gz SRR6344951_trimmed.fastq.gz 
+conda activate fastqcenv
+fastqc SRR6344949_trimmed2.fastq.gz
+fastqc SRR6344950_trimmed2.fastq.gz
+fastqc SRR6344951_trimmed2.fastq.gz
+conda deactivate
+
+
+
+
+conda activate bowtieenv
+cd ../control
+bowtie2 -t -p 6 -x ../ref/mus_ref -U SRR6344928_trimmed2.fastq.gz -S aligned28_v0.sam >align28.txt
+bowtie2 -t -p 6 -x ../ref/mus_ref -U SRR6344929_trimmed2.fastq.gz -S aligned29_v0.sam >align29.txt
+bowtie2 -t -p 6 -x ../ref/mus_ref -U SRR6344930_trimmed2.fastq.gz -S aligned30_v0.sam >align30.txt
+cd ../Pbrm1_KO
+bowtie2 -t -p 6 -x ../ref/mus_ref -U SRR6344937_trimmed2.fastq.gz -S aligned37_v0.sam >align37.txt
+bowtie2 -t -p 6 -x ../ref/mus_ref -U SRR6344938_trimmed2.fastq.gz -S aligned38_v0.sam >align38.txt
+bowtie2 -t -p 6 -x ../ref/mus_ref -U SRR6344939_trimmed2.fastq.gz -S aligned39_v0.sam >align39.txt
+cd ../control_IFNg
+bowtie2 -t -p 6 -x ../ref/mus_ref -U SRR6344940_trimmed2.fastq.gz -S aligned40_v0.sam >align40.txt
+bowtie2 -t -p 6 -x ../ref/mus_ref -U SRR6344941_trimmed2.fastq.gz -S aligned41_v0.sam >align41.txt
+bowtie2 -t -p 6 -x ../ref/mus_ref -U SRR6344942_trimmed2.fastq.gz -S aligned42_v0.sam >align42.txt
+cd ..
+conda deactivate
+conda activate samtoolenv
+cd ./control
+samtools view -@ 5 -o aligned28_v0.bam aligned28_v0.sam
+samtools sort -@ 5 aligned28_v0.bam -o aligned28_v0_srt.bam
+samtools index -@ 5 aligned28_v0_srt.bam
+samtools view -@ 5 -o aligned29_v0.bam aligned29_v0.sam
+samtools sort -@ 5 aligned29_v0.bam -o aligned29_v0_srt.bam
+samtools index -@ 5 aligned29_v0_srt.bam
+samtools view -@ 5 -o aligned30_v0.bam aligned30_v0.sam
+samtools sort -@ 5 aligned30_v0.bam -o aligned30_v0_srt.bam
+samtools index -@ 5 aligned30_v0_srt.bam
+cd ../Pbrm1_KO
+samtools view -@ 5 -o aligned37_v0.bam aligned37_v0.sam
+samtools sort -@ 5 aligned37_v0.bam -o aligned37_v0_srt.bam
+samtools index -@ 5 aligned37_v0_srt.bam
+samtools view -@ 5 -o aligned38_v0.bam aligned38_v0.sam
+samtools sort -@ 5 aligned38_v0.bam -o aligned38_v0_srt.bam
+samtools index -@ 5 aligned38_v0_srt.bam
+samtools view -@ 5 -o aligned39_v0.bam aligned39_v0.sam
+samtools sort -@ 5 aligned39_v0.bam -o aligned39_v0_srt.bam
+samtools index -@ 5 aligned39_v0_srt.bam
+cd ../control_IFNg
+samtools view -@ 5 -o aligned40_v0.bam aligned40_v0.sam
+samtools sort -@ 5 aligned40_v0.bam -o aligned40_v0_srt.bam
+samtools index -@ 5 aligned40_v0_srt.bam
+samtools view -@ 5 -o aligned41_v0.bam aligned41_v0.sam
+samtools sort -@ 5 aligned41_v0.bam -o aligned41_v0_srt.bam
+samtools index -@ 5 aligned41_v0_srt.bam
+samtools view -@ 5 -o aligned42_v0.bam aligned42_v0.sam
+samtools sort -@ 5 aligned42_v0.bam -o aligned42_v0_srt.bam
+samtools index -@ 5 aligned42_v0_srt.bam
+cd ../Pbrm1_KO_IFNg
+samtools view -@ 5 -o aligned51_v0.bam aligned51_v0.sam
+samtools sort -@ 5 aligned51_v0.bam -o aligned51_v0_srt.bam
+samtools index -@ 5 aligned51_v0_srt.bam
+samtools view -@ 5 -o aligned50_v0.bam aligned50_v0.sam
+samtools sort -@ 5 aligned50_v0.bam -o aligned50_v0_srt.bam
+samtools index -@ 5 aligned50_v0_srt.bam
+samtools view -@ 5 -o aligned49_v0.bam aligned49_v0.sam
+samtools sort -@ 5 aligned49_v0.bam -o aligned49_v0_srt.bam
+samtools index -@ 5 aligned49_v0_srt.bam
+cd ..
+conda deactivate
+conda activate subreadenv
+cd ./control
+featureCounts -T 6 -a ../ann/Mus_musculus.GRCm38.99.gtf -o control_rep1.count aligned28_v0_srt.bam
+featureCounts -T 6 -a ../ann/Mus_musculus.GRCm38.99.gtf -o control_rep2.count aligned29_v0_srt.bam
+featureCounts -T 6 -a ../ann/Mus_musculus.GRCm38.99.gtf -o control_rep3.count aligned30_v0_srt.bam
+cd ../Pbrm1_KO
+featureCounts -T 6 -a ../ann/Mus_musculus.GRCm38.99.gtf -o Pbrm1_KO_rep1.count aligned37_v0_srt.bam
+featureCounts -T 6 -a ../ann/Mus_musculus.GRCm38.99.gtf -o Pbrm1_KO_rep2.count aligned38_v0_srt.bam
+featureCounts -T 6 -a ../ann/Mus_musculus.GRCm38.99.gtf -o Pbrm1_KO_rep3.count aligned39_v0_srt.bam
+cd ../control_IFNg
+featureCounts -T 6 -a ../ann/Mus_musculus.GRCm38.99.gtf -o control_IFNg_rep1.count aligned40_v0_srt.bam
+featureCounts -T 6 -a ../ann/Mus_musculus.GRCm38.99.gtf -o control_IFNg_rep2.count aligned41_v0_srt.bam
+featureCounts -T 6 -a ../ann/Mus_musculus.GRCm38.99.gtf -o control_IFNg_rep3.count aligned42_v0_srt.bam
+cd ../Pbrm1_KO_IFNg
+featureCounts -T 6 -a ../ann/Mus_musculus.GRCm38.99.gtf -o Pbrm1_KO_IFNg_rep1.count aligned49_v0_srt.bam
+featureCounts -T 6 -a ../ann/Mus_musculus.GRCm38.99.gtf -o Pbrm1_KO_IFNg_rep2.count aligned50_v0_srt.bam
+featureCounts -T 6 -a ../ann/Mus_musculus.GRCm38.99.gtf -o Pbrm1_KO_IFNg_rep3.count aligned51_v0_srt.bam

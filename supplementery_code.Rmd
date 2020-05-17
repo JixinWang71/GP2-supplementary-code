@@ -1,0 +1,326 @@
+---
+title: "supplementary_code"
+author: '857'
+date: "2020/5/16"
+output: html_document
+---
+
+```{r cache=TRUE}
+library(dplyr)
+library(DESeq2)
+library(ggplot2)
+library(gridExtra)
+library(org.Mm.eg.db)
+library(goseq)
+library(fgsea)
+library(AnnotationHub)
+library(msigdbr)
+library(biomaRt)
+library(tidyverse)
+
+#####read in table
+S1<-read.table("control_rep1.count",
+               sep="\t",quote="",header=T)
+S2<-read.table("control_rep2.count",
+               sep="\t",quote="",header=T)
+S3<-read.table("control_rep3.count",
+               sep="\t",quote="",header=T)
+S4<-read.table("Pbrm1_KO_rep1.count",
+               sep="\t",quote="",header=T)
+S5<-read.table("Pbrm1_KO_rep2.count",
+               sep="\t",quote="",header=T)
+S6<-read.table("Pbrm1_KO_rep3.count",
+               sep="\t",quote="",header=T)
+S7<-read.table("control_IFNg_rep1.count",
+               sep="\t",quote="",header=T)
+S8<-read.table("control_IFNg_rep2.count",
+               sep="\t",quote="",header=T)
+S9<-read.table("control_IFNg_rep3.count",
+               sep="\t",quote="",header=T)
+S10<-read.table("Pbrm1_KO_IFNg_rep1.count",
+               sep="\t",quote="",header=T)
+S11<-read.table("Pbrm1_KO_IFNg_rep2.count",
+               sep="\t",quote="",header=T)
+S12<-read.table("Pbrm1_KO_IFNg_rep3.count",
+               sep="\t",quote="",header=T)
+```
+
+```{r cache=TRUE}
+###synthesize table
+IFNg_change<-as.data.frame(cbind(s4=S4$aligned37_v0_srt.bam,
+                                 s5=S5$aligned38_v0_srt.bam,
+                                 s6=S6$aligned39_v0_srt.bam,
+                                 s10=S10$aligned49_v0_srt.bam,
+                                 s11=S11$aligned50_v0_srt.bam,
+                                 s12=S12$aligned51_v0_srt.bam,
+                                 length=S1$Length))
+
+rownames(IFNg_change)<-S4$Geneid
+
+#build deseq2 object
+configure_IFNg_change=data.frame(condition=factor(c("control_trt","control_trt",
+                                                    "control_trt","defi_trt",
+                                                    "defi_trt","defi_trt")),
+                                 type=c("r1","r2","r3","r1","r2","r3"))
+dds_IFNg_change=DESeqDataSetFromMatrix(countData = IFNg_change[,1:6], 
+                                       colData = configure_IFNg_change,
+                                       design = ~ condition)
+dds_IFNg_change = estimateSizeFactors(dds_IFNg_change) 
+dds_IFNg_change=estimateDispersions(dds_IFNg_change)
+dds_IFNg_change$sizeFactor
+##get normalized counts
+deseqnmlized_IFNg_change<-as.data.frame(counts(dds_IFNg_change,normalized=T))
+deseqnmlized_IFNg_change$sum<-apply(deseqnmlized_IFNg_change[,1:6],1,sum)
+
+```
+
+```{r cache=TRUE}
+
+##########check normalization quality####
+#barplot
+colnames(IFNg_change)<-c("control_ifng_rep1","control_ifng_rep2",
+                         "control_ifng_rep3","defi_ifng_rep1",
+                         "defi_ifng_rep2","defi_ifng_rep3",
+                         "length")
+barplot(apply(IFNg_change[,1:6],2,sum),
+        las=2,
+        ylim = c(0,20000000),
+        cex.names = 0.57,
+        main="total density before normalization")
+colnames(deseqnmlized_IFNg_change)<-c("control_ifng_rep1","control_ifng_rep2",
+                         "control_ifng_rep3","defi_ifng_rep1",
+                         "defi_ifng_rep2","defi_ifng_rep3"
+                         )
+barplot(apply(deseqnmlized_IFNg_change[,1:6],2,sum),
+        cex.names = 0.57,
+        las=2,
+        ylim = c(0,20000000),
+        main = "total density after normalization")
+
+
+
+##mds plot
+sampleDists_IFNg_change = dist(t(IFNg_change[,1:6]))
+ sampleDists_IFNg_change
+ sampleDistMatrix_IFNg_change = as.matrix( sampleDists_IFNg_change )
+mds_IFNg_change <- as.data.frame(colData(dds_IFNg_change))  %>%
+  cbind(cmdscale(sampleDistMatrix_IFNg_change))
+mds_IFNg_change
+mds_IFNg_change_p<-ggplot(mds_IFNg_change, aes(x = `1`, y = `2`, color = condition)) +
+  geom_point(size = 3) + coord_fixed() + ggtitle("MDS before normalized")+
+  theme(plot.title=element_text(size=20))+
+  theme(axis.text.x = element_text(size=20))+
+  theme(legend.text = element_text(size=20))
+
+
+sampleDists_IFNg_change = dist(t(counts(dds_IFNg_change,normalize=T)))
+sampleDists_IFNg_change
+sampleDistMatrix_IFNg_change = as.matrix( sampleDists_IFNg_change )
+mds_IFNg_change <- as.data.frame(colData(dds_IFNg_change))  %>%
+  cbind(cmdscale(sampleDistMatrix_IFNg_change))
+mds_IFNg_change
+mds_IFNg_change_n_p<-ggplot(mds_IFNg_change, aes(x = `1`, y = `2`, color = condition)) +
+  geom_point(size = 3) + coord_fixed() + ggtitle("MDS after normalized by deseq2")+
+  theme(plot.title=element_text(size=20))+
+  theme(axis.text.x = element_text(size=20))+
+  theme(legend.text = element_text(size=20))
+
+grid.arrange(mds_IFNg_change_p,mds_IFNg_change_n_p)
+
+##intragroup cv
+cv<-function(x) {
+  if (sum(x)==0) {
+    a=0
+    return(a)
+  } else {
+    return(var(x)^(0.5)/mean(x))
+  }
+}
+
+
+cv.before<-c()
+for (i in 1:nrow(IFNg_change)) {
+  meancv<-(apply(IFNg_change[i,1:3],1,cv)+apply(IFNg_change[i,4:6],1,cv))/2
+  cv.before<-c(cv.before,meancv)
+}
+
+cv.after<-c()
+for (i in 1:nrow(deseqnmlized_IFNg_change)) {
+  meancv<-(apply(deseqnmlized_IFNg_change[i,1:3],1,cv)+apply(deseqnmlized_IFNg_change[i,4:6],1,cv))/2
+  cv.after<-c(cv.after,meancv)
+}
+
+library(ggplot2)
+ggplot()+geom_boxplot(aes(x="cv before",y=cv.before,col="cv.before" ))+
+  geom_boxplot(aes(x="cv after",y=cv.after,col="cv.after"))+
+  ylab("coefficient of variation")+
+  xlab("different condition")+
+  ggtitle("intragroup coefficient of variation before and after normalization")+
+  theme(plot.title=element_text(size=20))+
+  theme(axis.text.x = element_text(size=20))+
+  theme(axis.title.y = element_text(size=20))+
+  theme(legend.text = element_text(size=20))
+```
+
+```{r cache=TRUE}
+dim(counts(dds_IFNg_change))
+keep = rowSums(counts(dds_IFNg_change)) >= 3
+dds_IFNg_change = dds_IFNg_change[keep,]
+dds_IFNg_change = DESeq(dds_IFNg_change)
+res_IFNg_change = results(dds_IFNg_change)
+summary(res_IFNg_change)
+write.csv(res_IFNg_change,"res_IFNg_change.csv")
+par(mfrow=c(1,1))
+res_IFNg_changeLFC2 = results(dds_IFNg_change, lfcThreshold=2,alpha=0.05)
+summary(res_IFNg_changeLFC2)
+##plot volcano plot
+res_IFNg_change_data<-read.csv("res_IFNg_change.csv", header=T, row.names=1)
+res_IFNg_change_data$symbol<-mapIds(org.Mm.eg.db,
+                                    keys=rownames(res_IFNg_change_data),
+                                    column="SYMBOL",
+                                    keytype="ENSEMBL",
+                                    multiVals="first")
+res_IFNg_change_data<-res_IFNg_change_data %>% mutate(threshold=padj<0.05)
+forlabel<-res_IFNg_change_data %>% filter(log2FoldChange>5 & padj<(1*10^(-50)))
+ggplot(res_IFNg_change_data,aes(x =log2FoldChange, y = -log10(padj))) + 
+   geom_point(aes(color=threshold)) + 
+   xlab("log2 fold change") + 
+   ylab("-log10 adjusted p-value") + 
+   theme(legend.position = "none", 
+         plot.title = element_text(size = rel(1.5), hjust = 0.5), 
+         axis.title = element_text(size = rel(1.25)))+
+   geom_point(size = 3, shape = 1, data = forlabel)+
+   ggrepel::geom_label_repel(
+            aes(label = symbol),
+            data = forlabel,
+            color="black"
+         )
+
+```
+
+```{r cache=TRUE}
+##goseq
+d_IFNg_change <- read.csv("res_IFNg_change.csv", header=T, row.names=1)
+d_IFNg_change$padj<-as.numeric(d_IFNg_change$padj)
+d_IFNg_change$geneid<-rownames(d_IFNg_change)
+d_IFNg_change<-merge(d_IFNg_change,S1,by.x="geneid",by.y="Geneid")
+
+all_genes_IFNg_change <- as.vector(d_IFNg_change$geneid)
+DE_genes_IFNg_change <- all_genes_IFNg_change[which(d_IFNg_change$padj<0.05 & d_IFNg_change$log2FoldChange>2)]
+gene.vector_IFNg_change<-as.integer(all_genes_IFNg_change %in% DE_genes_IFNg_change) 
+names(gene.vector_IFNg_change)<-all_genes_IFNg_change
+pwf=nullp(gene.vector_IFNg_change,bias.data = d_IFNg_change$Length)
+rownames(pwf)<-names(gene.vector_IFNg_change)
+
+gocat<-getgo(all_genes_IFNg_change, "mm10", "ensGene",fetch.cats=c("GO:CC","GO:BP","GO:MF"))
+goseq_IFNg_change<-goseq(pwf,"mm10","ensGene",gene2cat=gocat)
+goseq_IFNg_change$over_represented_pvalue<-p.adjust(goseq_IFNg_change$over_represented_pvalue,method = "BH")
+goseq_IFNg_change$under_represented_pvalue<-p.adjust(goseq_IFNg_change$under_represented_pvalue,method = "BH")
+enrichedgo_IFNg_change<-goseq_IFNg_change[goseq_IFNg_change$over_represented_pvalue<0.05,]
+enrichedgo_IFNg_change_down<-goseq_IFNg_change[goseq_IFNg_change$under_represented_pvalue<0.05,]
+enrichedgo_IFNg_change$percent<-enrichedgo_IFNg_change$numDEInCat/enrichedgo_IFNg_change$numInCat
+write.table(enrichedgo_IFNg_change[,c(1,2)],"enrichedgo.txt",
+            quote = F,row.names = F,col.names = F)
+```
+
+```{r cache=TRUE}
+##fgsea
+##conert mouse ensemble id to human symbol
+mart <- useDataset("mmusculus_gene_ensembl", mart=useMart("ensembl"))
+bm <- getBM(attributes=c("ensembl_gene_id", "hsapiens_homolog_associated_gene_name"), mart=mart) %>%
+  distinct() %>%
+  as_tibble() %>%
+  na_if("") %>% 
+  na.omit()
+
+###databse of pathways
+m_df = msigdbr()
+m_df = msigdbr() %>% dplyr::filter(gs_cat == "H")
+m_list = m_df %>% split(x = .$human_gene_symbol, f = .$gs_name)
+
+resop_IFNg_change<-read.csv("res_IFNg_change.csv")
+resop_IFNg_change$X<-as.character(resop_IFNg_change$X)
+resop_IFNg_change <- inner_join(resop_IFNg_change, bm, by=c("X"="ensembl_gene_id"))
+head(resop_IFNg_change)
+res2_IFNg_change <- resop_IFNg_change %>% 
+  dplyr::select(hsapiens_homolog_associated_gene_name, stat) %>% 
+  na.omit() %>% 
+  distinct() %>% 
+  group_by(hsapiens_homolog_associated_gene_name) %>% 
+  summarize(stat=mean(stat))
+head(res2_IFNg_change)
+ranks_IFNg_change <- deframe(res2_IFNg_change)
+head(ranks_IFNg_change, 20)
+ranks_IFNg_change<-sort(ranks_IFNg_change)
+fgseaRes_IFNg_change <- fgsea(pathways = m_list, 
+                               stats = ranks_IFNg_change,
+                               nperm=10000)
+
+collapsedPathways <- collapsePathways(fgseaRes_IFNg_change[order(pval)][padj < 0.01], 
+                                      m_list, ranks_IFNg_change)
+mainPathways <- fgseaRes_IFNg_change[pathway %in% collapsedPathways$mainPathways][
+  order(-NES), pathway]
+
+plotGseaTable(m_list[mainPathways[c(1:7,11:15)]], ranks_IFNg_change, fgseaRes_IFNg_change, 
+              gseaParam = 0.5)
+
+plotEnrichment(m_list[["HALLMARK_INTERFERON_GAMMA_RESPONSE"]],
+               ranks_IFNg_change) + labs(title="HALLMARK_INTERFERON_GAMMA_RESPONSE")
+```
+
+```{r cache=TRUE}
+
+control_KO_totalgene<-as.data.frame(cbind(s1=S1$aligned28_v0_srt.bam,
+                               s2=S2$aligned29_v0_srt.bam,
+                               s3=S3$aligned30_v0_srt.bam,
+                               s4=S4$aligned37_v0_srt.bam,
+                               s5=S5$aligned38_v0_srt.bam,
+                               s6=S6$aligned39_v0_srt.bam,
+                               length=S1$Length))
+rownames(control_KO_totalgene)<-S1$Geneid
+
+configure_control_KO=data.frame(condition=factor(c("control","control",
+                                        "control","PbrmKO",
+                                        "PbrmKO","PbrmKO")),
+                   type=c("r1","r2","r3","r1","r2","r3"))
+dds_control_KO=DESeqDataSetFromMatrix(countData = control_KO_totalgene[,1:6], 
+                           colData = configure_control_KO,
+                           design = ~ condition)
+
+
+dim(counts(dds_control_KO))
+keep = rowSums(counts(dds_control_KO)) >= 3
+dds_control_KO = dds_control_KO[keep,]
+dds_control_KO = DESeq(dds_control_KO)
+res_control_KO = results(dds_control_KO)
+summary(res_control_KO)
+write.csv(res_control_KO,"res_control_KO.csv")
+
+
+resop_control_KO<-read.csv("res_control_KO.csv")
+resop_control_KO$X<-as.character(resop_control_KO$X)
+resop_control_KO <- inner_join(resop_control_KO, bm, by=c("X"="ensembl_gene_id"))
+head(resop_control_KO)
+res2_control_KO <- resop_control_KO %>% 
+  dplyr::select(hsapiens_homolog_associated_gene_name, stat) %>% 
+  na.omit() %>% 
+  distinct() %>% 
+  group_by(hsapiens_homolog_associated_gene_name) %>% 
+  summarize(stat=mean(stat))
+head(res2_control_KO)
+ranks_control_KO <- deframe(res2_control_KO)
+head(ranks_control_KO, 20)
+ranks_control_KO<-sort(ranks_control_KO)
+fgseaRes_control_KO <- fgsea(pathways = m_list, 
+                               stats = ranks_control_KO,
+                               nperm=10000)
+
+
+collapsedPathways_KO <- collapsePathways(fgseaRes_control_KO[order(pval)][padj < 0.01], m_list, ranks_control_KO)
+mainPathways_KO <- fgseaRes_control_KO[pathway %in% collapsedPathways_KO$mainPathways][order(-NES), pathway]
+
+plotGseaTable(m_list[mainPathways_KO], ranks_control_KO, fgseaRes_control_KO, 
+              gseaParam = 0.5)
+
+
+```
